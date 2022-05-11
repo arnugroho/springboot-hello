@@ -1,5 +1,6 @@
 package com.arnugroho.springboot.hello.controller;
 
+import com.arnugroho.springboot.hello.model.dto.DefaultResponse;
 import com.arnugroho.springboot.hello.model.dto.MahasiswaDto;
 import com.arnugroho.springboot.hello.model.entity.Mahasiswa;
 import com.arnugroho.springboot.hello.repository.MahasiswaRepository;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/mahasiswa")
@@ -37,15 +39,23 @@ public class MahasiswaController {
     }
 
     @GetMapping("/getbyname/{name}")
-    public MahasiswaDto getByName(@PathVariable String name){
-        List<MahasiswaDto> list = listData();
-        MahasiswaDto mahasiswaDto = new MahasiswaDto();
-        for (MahasiswaDto m : list){
-            if(m.getNama().equalsIgnoreCase(name)){
-                mahasiswaDto = m;
-            }
+    public DefaultResponse<MahasiswaDto> getByName(@PathVariable String name){
+//        List<MahasiswaDto> list = listData();
+//        MahasiswaDto mahasiswaDto = new MahasiswaDto();
+//        for (MahasiswaDto m : list){
+//            if(m.getNama().equalsIgnoreCase(name)){
+//                mahasiswaDto = m;
+//            }
+//        }
+        DefaultResponse<MahasiswaDto> response = new DefaultResponse<>();
+        Optional<Mahasiswa> optional = mahasiswaRepository.findByNama(name);
+        if(optional.isPresent()){
+            response.setMessage("Data Ditemukan");
+            response.setData(convertEntityToDto(optional.get()));
+        } else {
+            response.setMessage("Data Tidak Ditemukan");
         }
-        return mahasiswaDto;
+        return response;
     }
 
     public List<MahasiswaDto> listData(){
@@ -64,12 +74,19 @@ public class MahasiswaController {
     }
 
     @PostMapping("/save")
-    public MahasiswaDto savemahasiswa(@RequestBody MahasiswaDto mahasiswaDto){
+    public DefaultResponse<MahasiswaDto> savemahasiswa(@RequestBody MahasiswaDto mahasiswaDto){
         Mahasiswa mahasiswa = convertDtoToEntity(mahasiswaDto);
-        mahasiswaRepository.save(mahasiswa);
-//        mahasiswaDto.setNama("Nama : " + mahasiswaDto.getNama());
+        DefaultResponse<MahasiswaDto> response = new DefaultResponse<>();
+        Optional<Mahasiswa> optional = mahasiswaRepository.findById(mahasiswaDto.getNim());
+        if(optional.isPresent()){
+            response.setMessage("Error, Data Sudah Tersedia");
+        } else {
+            mahasiswaRepository.save(mahasiswa);
+            response.setMessage("Berhasil Simpan Data");
+            response.setData(mahasiswaDto);
+        }
 
-        return mahasiswaDto;
+        return response;
     }
 
     public Mahasiswa convertDtoToEntity(MahasiswaDto dto){
