@@ -1,8 +1,11 @@
 package com.arnugroho.springboot.hello.controller;
 
 import com.arnugroho.springboot.hello.model.dto.DefaultResponse;
+import com.arnugroho.springboot.hello.model.dto.MahasiswaDetailDto;
 import com.arnugroho.springboot.hello.model.dto.MahasiswaDto;
+import com.arnugroho.springboot.hello.model.entity.DetailMahasiswa;
 import com.arnugroho.springboot.hello.model.entity.Mahasiswa;
+import com.arnugroho.springboot.hello.repository.DetailMahasiswaRepository;
 import com.arnugroho.springboot.hello.repository.MahasiswaRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +17,11 @@ import java.util.Optional;
 @RequestMapping("/mahasiswa")
 public class MahasiswaController {
     private final MahasiswaRepository mahasiswaRepository;
+    private final DetailMahasiswaRepository detailMahasiswaRepository;
 
-    public MahasiswaController(MahasiswaRepository mahasiswaRepository) {
+    public MahasiswaController(MahasiswaRepository mahasiswaRepository, DetailMahasiswaRepository detailMahasiswaRepository) {
         this.mahasiswaRepository = mahasiswaRepository;
+        this.detailMahasiswaRepository = detailMahasiswaRepository;
     }
 
     @GetMapping("/")
@@ -36,6 +41,23 @@ public class MahasiswaController {
         }
 
         return list;
+    }
+
+    @GetMapping("/mahasiswadetail/{idMhs}")
+    public MahasiswaDetailDto getListMahasiswa(@PathVariable Long idMhs){
+        Optional<Mahasiswa> optionalMahasiswa = mahasiswaRepository.findById(idMhs);
+        MahasiswaDetailDto dto = new MahasiswaDetailDto();
+        if(optionalMahasiswa.isPresent()){
+            Mahasiswa mahasiswa = optionalMahasiswa.get();
+            dto.setNama(mahasiswa.getNama());
+            dto.setGolonganDarah(mahasiswa.getDetailMahasiswa().getGolanganDarah());
+//            Optional<DetailMahasiswa> optionalDetailMahasiswa =  detailMahasiswaRepository.findById(mahasiswa.getDetailId());
+//            if(optionalDetailMahasiswa.isPresent()){
+//                DetailMahasiswa detailMahasiswa = optionalDetailMahasiswa.get();
+//                dto.setGolonganDarah(detailMahasiswa.getGolanganDarah());
+//            }
+        }
+        return dto;
     }
 
     @GetMapping("/getbyname/{name}")
