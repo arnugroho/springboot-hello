@@ -1,5 +1,6 @@
 package com.arnugroho.springboot.hello.controller;
 
+import com.arnugroho.springboot.hello.controller.convert.MahasiswaConvert;
 import com.arnugroho.springboot.hello.model.dto.DefaultResponse;
 import com.arnugroho.springboot.hello.model.dto.MahasiswaDetailDto;
 import com.arnugroho.springboot.hello.model.dto.MahasiswaDto;
@@ -37,7 +38,7 @@ public class MahasiswaController {
 //        List<MahasiswaDto> list = listData();
         List<MahasiswaDto> list = new ArrayList();
         for(Mahasiswa m :mahasiswaRepository.findAll()){
-            list.add(convertEntityToDto(m));
+            list.add(MahasiswaConvert.convertEntityToDto(m));
         }
 
         return list;
@@ -73,7 +74,7 @@ public class MahasiswaController {
         Optional<Mahasiswa> optional = mahasiswaRepository.findByNama(name);
         if(optional.isPresent()){
             response.setMessage("Data Ditemukan");
-            response.setData(convertEntityToDto(optional.get()));
+            response.setData(MahasiswaConvert.convertEntityToDto(optional.get()));
         } else {
             response.setMessage("Data Tidak Ditemukan");
         }
@@ -97,7 +98,7 @@ public class MahasiswaController {
 
     @PostMapping("/save")
     public DefaultResponse<MahasiswaDto> savemahasiswa(@RequestBody MahasiswaDto mahasiswaDto){
-        Mahasiswa mahasiswa = convertDtoToEntity(mahasiswaDto);
+        Mahasiswa mahasiswa = MahasiswaConvert.convertDtoToEntity(mahasiswaDto);
         DefaultResponse<MahasiswaDto> response = new DefaultResponse<>();
         Optional<Mahasiswa> optional = mahasiswaRepository.findById(mahasiswaDto.getNim());
         if(optional.isPresent()){
@@ -111,21 +112,5 @@ public class MahasiswaController {
         return response;
     }
 
-    public Mahasiswa convertDtoToEntity(MahasiswaDto dto){
-        Mahasiswa mahasiswa = new Mahasiswa();
-        mahasiswa.setNim(dto.getNim());
-        mahasiswa.setNama(dto.getNama());
-        mahasiswa.setAlamat(dto.getAlamat());
 
-        return mahasiswa;
-    }
-
-    public MahasiswaDto convertEntityToDto(Mahasiswa entity){
-        MahasiswaDto dto = new MahasiswaDto();
-        dto.setNim(entity.getNim());
-        dto.setNama(entity.getNama());
-        dto.setAlamat(entity.getAlamat());
-
-        return dto;
-    }
 }
